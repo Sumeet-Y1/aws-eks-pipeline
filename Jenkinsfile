@@ -17,13 +17,6 @@ pipeline {
             }
         }
 
-        stage('Build JAR') {
-            steps {
-                echo 'Building Spring Boot JAR...'
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
