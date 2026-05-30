@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-eks-pipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aws-eks-pipeline
+  template:
+    metadata:
+      labels:
+        app: aws-eks-pipeline
+    spec:
+      containers:
+        - name: aws-eks-pipeline
+          image: AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/aws-eks-pipeline:latest
+          ports:
+            - containerPort: 8080
