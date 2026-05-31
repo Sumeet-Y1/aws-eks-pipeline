@@ -47,6 +47,7 @@ pipeline {
                 script {
                     sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER}"
                     sh "sed -i 's|AWS_ACCOUNT_ID|${env.AWS_ACCOUNT_ID}|g' k8s/deployment.yaml"
+                    sh "sed -i 's|:latest|:${IMAGE_TAG}|g' k8s/deployment.yaml"
                     sh "kubectl apply -f k8s/deployment.yaml"
                     sh "kubectl apply -f k8s/service.yaml"
                     sh "kubectl rollout status deployment/aws-eks-pipeline"
