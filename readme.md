@@ -106,6 +106,8 @@ Every `git push` to main automatically triggers the full pipeline via GitHub web
 
 ## 📊 Monitoring
 
+![Grafana Dashboard](screenshots/grafana-dashboard.png)
+
 Full monitoring stack deployed via Helm on the EKS cluster using **kube-prometheus-stack** — includes Prometheus, Grafana, and AlertManager.
 
 ```bash
