@@ -1,6 +1,6 @@
 # 🚀 AWS EKS Pipeline
 
-A Spring Boot Hello World application deployed on **AWS EKS** using **Jenkins CI/CD pipeline** with full Infrastructure as Code via Terraform.
+A Spring Boot Hello World application deployed on **AWS EKS** using **Jenkins CI/CD pipeline** with full Infrastructure as Code via Terraform and real-time monitoring via Prometheus & Grafana.
 
 ## 🏗️ Architecture
 
@@ -18,6 +18,10 @@ Jenkins pushes image to AWS ECR
 Jenkins deploys to AWS EKS (Kubernetes)
         ↓
 App is live behind AWS LoadBalancer
+        ↓
+Prometheus scrapes metrics from EKS
+        ↓
+Grafana visualizes dashboards & alerts
 ```
 
 ## 🛠️ Tech Stack
@@ -31,6 +35,8 @@ App is live behind AWS LoadBalancer
 | **AWS EKS** | Kubernetes cluster |
 | **Terraform** | Infrastructure as Code |
 | **Helm** | Kubernetes package manager |
+| **Prometheus** | Metrics collection |
+| **Grafana** | Monitoring dashboards |
 
 ## 📁 Project Structure
 
@@ -100,17 +106,35 @@ Every `git push` to main automatically triggers the full pipeline via GitHub web
 
 ## 📊 Monitoring
 
-Prometheus and Grafana monitoring stack is configured via Helm in the `monitoring` namespace.
-
-> **Note:** Full monitoring stack requires nodes with at least **t3.medium** or higher. On **t3.micro**, Kubernetes system pods consume most available memory, leaving insufficient resources for the monitoring stack. Upgrade node instance type for production use.
+Full monitoring stack deployed via Helm on the EKS cluster using **kube-prometheus-stack** — includes Prometheus, Grafana, and AlertManager.
 
 ```bash
-# Install monitoring stack (requires t3.medium+ nodes)
+# Install monitoring stack
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo add grafana https://grafana.github.io/helm-charts
-helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
-helm install grafana grafana/grafana --namespace monitoring
+helm repo update
+helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --timeout 10m
 ```
+
+### Access Grafana
+```bash
+# Get admin password
+$encoded = kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data.admin-password}"
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encoded))
+
+# Port forward
+kubectl --namespace monitoring port-forward svc/monitoring-grafana 3000:80
+```
+
+Open `http://localhost:3000` → login with `admin` and the password above.
+
+### Grafana Dashboard
+Import dashboard ID **`15661`** for full Kubernetes cluster monitoring:
+- Node CPU & Memory usage
+- Pod health and status
+- Network traffic overview
+- Namespace resource breakdown
+
+> **Note:** kube-prometheus-stack requires nodes with sufficient resources. Tested on **m7i-flex.large** (2 vCPU, 8GB RAM).
 
 ## 👨‍💻 Author
 
